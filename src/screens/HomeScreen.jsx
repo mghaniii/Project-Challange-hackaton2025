@@ -31,7 +31,7 @@ function HomeScreen() {
   return (
     // Container utama mungkin sudah di-handle oleh MainLayout,
     // tapi jika ada background spesifik di sini, tambahkan dark mode
-    <div className="container mx-auto text-center p-4">
+    <div className="container mx-auto text-center p-4 ">
       <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">
         Halo User!
       </h1>
