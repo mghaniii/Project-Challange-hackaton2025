@@ -19,13 +19,13 @@ function NgobrolAiScreen() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Ngobrol AI Seru</h1>
+      <h1 className="text-2xl font-bold mb-6 dark:text-gray-300">Ngobrol AI Seru</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
         {aiModes.map((mode) => (
           <button
             key={mode.slug}
             onClick={() => handleModeSelect(mode.slug)}
-            className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow text-left"
+            className="bg-slate-100 dark:bg-slate-900 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow text-left"
           >
             <span className="text-4xl block mb-2">{mode.emoji}</span>
             <h2 className="text-xl font-semibold text-teal-600 mb-1">{mode.name}</h2>

@@ -54,23 +54,23 @@ const badges = [
 function DashboardScreen() {
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Dashboard-ku</h1>
+      <h1 className="text-2xl font-bold mb-6 dark:text-gray-300">Dashboard-ku</h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Grafik Mood */}
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Riwayat Emosi Mingguan</h2>
+        <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-lg shadow-lg">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Riwayat Emosi Mingguan</h2>
           <Line data={moodData} />
         </div>
 
         {/* Challenge Selesai & Badge */}
         <div className="space-y-6">
           {/* Challenge */}
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Challenge Selesai</h2>
+          <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semiboldtext-gray-800 dark:text-gray-100 mb-4">Challenge Selesai</h2>
             {completedChallenges.length > 0 ? (
               <ul className="space-y-2">
                 {completedChallenges.map(ch => (
-                  <li key={ch.id} className="text-gray-600">✅ {ch.title}</li>
+                  <li key={ch.id} className="bg-slate-100 dark:bg-slate-900">✅ {ch.title}</li>
                 ))}
               </ul>
             ) : (
@@ -79,8 +79,8 @@ function DashboardScreen() {
           </div>
 
           {/* Badge */}
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Badge Terkumpul</h2>
+          <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Badge Terkumpul</h2>
             {badges.length > 0 ? (
               <div className="flex flex-wrap gap-3">
                 {badges.map(b => (

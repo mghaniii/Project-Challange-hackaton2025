@@ -15,12 +15,12 @@ function DailyChallengeScreen() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Challenge Harian</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Challenge Harian</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {challenges.map((challenge) => (
-          <div key={challenge.id} className={`bg-white p-6 rounded-lg shadow-lg border-l-4 ${challenge.completed ? 'border-green-500' : 'border-yellow-500'}`}>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">{challenge.title}</h2>
-            <p className="text-gray-600 mb-4">{challenge.description}</p>
+          <div key={challenge.id} className={`bg-slate-100 dark:bg-slate-900 p-6 rounded-lg shadow-lg border-l-4 ${challenge.completed ? 'border-green-500' : 'border-yellow-500'}`}>
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">{challenge.title}</h2>
+            <p className="text-gray-800 dark:text-gray-100 mb-4">{challenge.description}</p>
             <div className="flex justify-end space-x-2">
               {!challenge.completed && (
                 <button className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
