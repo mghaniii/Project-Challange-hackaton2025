@@ -12,7 +12,7 @@ const edukasiLevels = [
 function SadariDiriPathScreen() {
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Jalur Sadari Diri: Anti-Judi</h1>
+      <h1 className="text-2xl font-bold mb-6 dark:text-gray-300">Jalur Sadari Diri: Anti-Judi</h1>
       <div className="space-y-4">
         {edukasiLevels.map((level, index) => (
           <Link
@@ -20,8 +20,8 @@ function SadariDiriPathScreen() {
             to={level.isLocked ? '#' : `/sadari-diri/${level.id}`}
             className={`block p-6 rounded-lg shadow-lg transition-all ${
               level.isLocked
-                ? 'bg-gray-200 cursor-not-allowed'
-                : 'bg-white hover:shadow-xl hover:bg-teal-50'
+                ? 'bg-slate-100 dark:bg-slate-900 cursor-not-allowed'
+                : 'bg-slate-100 dark:bg-slate-900 hover:shadow-xl hover:bg-slate-800'
             }`}
           >
             <div className="flex items-center justify-between">
