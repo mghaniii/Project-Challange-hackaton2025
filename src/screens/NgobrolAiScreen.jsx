@@ -25,7 +25,7 @@ function NgobrolAiScreen() {
           <button
             key={mode.slug}
             onClick={() => handleModeSelect(mode.slug)}
-            className="bg-slate-100 dark:bg-slate-900 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow text-left"
+            className="bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 hover:shadow-xl p-4 rounded"
           >
             <span className="text-4xl block mb-2">{mode.emoji}</span>
             <h2 className="text-xl font-semibold text-teal-600 mb-1">{mode.name}</h2>

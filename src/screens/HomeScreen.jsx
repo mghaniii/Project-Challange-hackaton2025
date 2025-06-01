@@ -5,7 +5,7 @@ import { useUser } from '../context/UserContext'; // Tetap gunakan ini
 
 // moods array tetap sama
 const moods = [
-  { name: "Senang", emoji: "😊", color: "bg-green-400 hover:bg-green-500", value: "senang" },
+  { name: "Senang", emoji: "😊", color: "bg-green-400 hover:bg-green-500 ", value: "senang" },
   { name: "Biasa", emoji: "😐", color: "bg-yellow-400 hover:bg-yellow-500", value: "biasa" },
   { name: "Sedih", emoji: "😢", color: "bg-blue-400 hover:bg-blue-500", value: "sedih" },
   { name: "Cemas", emoji: "😟", color: "bg-orange-400 hover:bg-orange-500", value: "cemas" },

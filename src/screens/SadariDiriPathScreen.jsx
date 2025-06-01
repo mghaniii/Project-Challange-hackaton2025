@@ -21,7 +21,7 @@ function SadariDiriPathScreen() {
             className={`block p-6 rounded-lg shadow-lg transition-all ${
               level.isLocked
                 ? 'bg-slate-100 dark:bg-slate-900 cursor-not-allowed'
-                : 'bg-slate-100 dark:bg-slate-900 hover:shadow-xl hover:bg-slate-800'
+                : 'bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700'
             }`}
           >
             <div className="flex items-center justify-between">
