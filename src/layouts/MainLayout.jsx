@@ -72,7 +72,7 @@ function MainLayout() {
           }}
         >
           <ShieldCheckIcon className={`h-8 w-8 ${!isDesktopCollapsed ? 'mr-2' : ''} text-teal-400 flex-shrink-0`} />
-          {!isDesktopCollapsed && <span className="transition-opacity duration-200">SadariDiri</span>}
+          {!isDesktopCollapsed && <span className="transition-opacity duration-200">Kuat Diri</span>}
         </Link>
         {isDesktop && (
           <button
