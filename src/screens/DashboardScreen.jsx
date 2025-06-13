@@ -1,6 +1,7 @@
-// screens/DashboardScreen.jsx
-import React from 'react';
-import { Line } from 'react-chartjs-2';
+import React, { useState, useMemo } from 'react';
+import MoodTrendChart from '../screens/MoodTrendChart';
+import { badgeList } from '../config/badges'; 
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,268 +14,224 @@ import {
 } from 'chart.js';
 import { useUser } from '../context/UserContext';
 
-// 1. Registrasi plugin chart.js
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
-// 2. DEFINISIKAN MAPPING MOOD (INI PENTING!)
+
+// Registrasi plugin chart.js
+ChartJS.register( CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend );
+
+// Definisi mapping mood
 const moodToValueMapping = {
-  "senang": 6,
-  "semangat": 5,
-  "biasa": 4,
-  "cemas": 3,
-  "sedih": 2,
-  "marah": 1,
+  "senang": 6, "semangat": 5, "biasa": 4, "cemas": 3, "sedih": 2, "marah": 1, "stres": 1,
 };
 
 const valueToMoodMapping = {
-  6: "Senang",
-  5: "Semangat",
-  4: "Biasa",
-  3: "Cemas",
-  2: "Sedih",
-  1: "Marah",
+  6: "Senang", 5: "Semangat", 4: "Biasa", 3: "Cemas", 2: "Sedih", 1: "Marah/Stres",
 };
 
-// Data dummy untuk Challenge & Badge (bisa Anda sesuaikan atau ganti dengan data dinamis nanti)
-const completedChallenges = [
-  { id: 'c1', title: 'Syukur Pagi Hari Ini' },
-  { id: 'c2', title: 'Minum 2L Air Putih' },
-];
 
-const badges = [
-  { id: 'b1', name: 'Pejuang Pagi' },
-  { id: 'b2', name: 'Mood Master' },
-];
+// --- Komponen Utama Dashboard ---
 
 function DashboardScreen() {
-  const { currentUser, moodHistory, loadingMoods, loadingAuth } = useUser();
+  const { currentUser, userBadges, loadingMoods, loadingAuth, moodHistory } = useUser();
+  
+  // State untuk buka-tutup panduan badge
+  const [showGuide, setShowGuide] = useState(false);
+  // --- STATE BARU UNTUK BUKA-TUTUP RIWAYAT MOOD ---
+  const [showMoodHistory, setShowMoodHistory] = useState(false);
 
-  // Filter mood entries untuk hari ini
-  const today = new Date();
-  const todayMoodEntries = moodHistory.filter(entry => {
-    if (!entry || !entry.timestamp || typeof entry.timestamp.toDate !== 'function') {
-      // Jika entry, timestamp, atau toDate tidak valid, lewati entri ini.
-      // Anda bisa tambahkan console.warn di sini jika ingin melacak data yang tidak valid.
-      // console.warn("Invalid mood entry found:", entry);
-      return false;
-    }
-    const entryDate = entry.timestamp.toDate();
-    return entryDate.getDate() === today.getDate() &&
-           entryDate.getMonth() === today.getMonth() &&
-           entryDate.getFullYear() === today.getFullYear();
-  });
 
-  // Kalkulasi Frekuensi Mood Harian
-  const calculateDailyMoodFrequency = (entries) => {
-    const frequency = {};
-    entries.forEach(entry => {
-      if (entry && entry.mood && typeof entry.mood === 'string') { // Pastikan entry.mood ada dan string
-        frequency[entry.mood] = (frequency[entry.mood] || 0) + 1;
+  // Fungsi untuk mendapatkan rentang tanggal default (7 hari terakhir)
+  const getInitialDateRange = () => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 6); // 7 hari termasuk hari ini
+    return { start, end };
+  };
+
+  // State untuk rentang tanggal dan status tampilan
+  const [startDate, setStartDate] = useState(getInitialDateRange().start);
+  const [endDate, setEndDate] = useState(getInitialDateRange().end);
+
+  // Filter moodHistory berdasarkan rentang tanggal, dioptimalkan dengan useMemo
+  const filteredMoodHistory = useMemo(() => {
+    if (!moodHistory || !startDate || !endDate) return [];
+
+    const startOfDay = new Date(startDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(endDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return moodHistory
+      .filter(entry => {
+        if (!entry?.timestamp?.toDate) return false;
+        const entryDate = entry.timestamp.toDate();
+        return entryDate >= startOfDay && entryDate <= endOfDay;
+      })
+      .sort((a, b) => b.timestamp.toDate() - a.timestamp.toDate());
+  }, [moodHistory, startDate, endDate]); 
+
+  // Kelompokkan riwayat mood per hari untuk tampilan ringkas
+  const groupedMoodHistory = useMemo(() => {
+    const groups = {};
+    filteredMoodHistory.forEach(entry => {
+      if (!entry?.timestamp?.toDate) return;
+      const dateKey = entry.timestamp.toDate().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
       }
+      groups[dateKey].push(entry);
     });
-    return frequency;
+    return groups;
+  }, [filteredMoodHistory]);
+
+  const handleDateChange = (e) => {
+    const { name, valueAsDate } = e.target;
+    if (name === "startDate") {
+      setStartDate(valueAsDate ? new Date(valueAsDate) : getInitialDateRange().start);
+    } else if (name === "endDate") {
+      setEndDate(valueAsDate ? new Date(valueAsDate) : getInitialDateRange().end);
+    }
+  };
+  
+  const resetDateRange = () => {
+    const { start, end } = getInitialDateRange();
+    setStartDate(new Date(start));
+    setEndDate(new Date(end));
   };
 
-  const dailyMoodFrequency = calculateDailyMoodFrequency(todayMoodEntries);
-
-  // Fungsi untuk mempersiapkan data chart
-  const getChartData = () => {
-    const dailyLatestMoods = {}; // Objek untuk menyimpan mood terakhir per hari
-    // Proses moodHistory untuk mendapatkan data harian
-    // Kita ambil mood terakhir yang diinput per hari untuk 7 hari unik terakhir
-    [...moodHistory]
-        .filter(entry => entry && entry.timestamp && typeof entry.timestamp.toDate === 'function' && entry.mood) // Filter data valid
-        .sort((a,b) => a.timestamp.toDate() - b.timestamp.toDate()) // Urutkan berdasarkan waktu
-        .forEach(entry => {
-            const dateKey = entry.timestamp.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-            // Ambil mood terakhir atau sesuaikan jika mau rata-rata
-            dailyLatestMoods[dateKey] = moodToValueMapping[entry.mood] || 0;
-        });
-
-    const labels = Object.keys(dailyLatestMoods).slice(-7); // Ambil 7 hari terakhir
-    const dataValues = labels.map(label => dailyLatestMoods[label]);
-
-    return {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Mood Harian (Nilai Terakhir)',
-          data: dataValues,
-          fill: false,
-          borderColor: 'rgb(20, 184, 166)',
-          tension: 0.3,
-        },
-      ],
-    };
-  };
-  const moodChartData = getChartData();
-
-
-  // Tampilan Loading
   if (loadingAuth || loadingMoods) {
-    return (
-      <div className="container mx-auto text-center p-4 flex justify-center items-center min-h-screen">
-        <p className="text-xl text-gray-600 dark:text-gray-300">Memuat data dashboard...</p>
-      </div>
-    );
+    return <div className="text-center p-6">Memuat data dashboard...</div>;
   }
-
-  // Jika tidak ada pengguna (seharusnya sudah ditangani Anonymous Auth, tapi sebagai fallback)
+  
   if (!currentUser) {
-    return (
-      <div className="container mx-auto text-center p-4 flex justify-center items-center min-h-screen">
-        <p className="text-xl text-gray-600 dark:text-gray-300">Pengguna tidak ditemukan. Silakan coba lagi.</p>
-      </div>
-    );
+    return <div className="text-center p-6">Pengguna tidak ditemukan.</div>;
   }
 
   return (
     <div className="container mx-auto p-4 md:p-6">
       <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-gray-100">Dashboard-ku</h1>
 
-      {/* Bagian Mood Hari Ini */}
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg mb-8">
-        <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6">
-          Mood Hari Ini ({new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })})
-        </h2>
-        {todayMoodEntries.length > 0 ? (
-          <div>
-            {/* Tampilkan Frekuensi Mood */}
-            <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300 mb-3">Ringkasan Mood:</h3>
-            {dailyMoodFrequency && Object.keys(dailyMoodFrequency).length > 0 ? (
-              <ul className="space-y-2 list-disc list-inside mb-6 pl-5">
-                {Object.entries(dailyMoodFrequency).map(([mood, count]) => {
-                  const moodDisplayName = typeof mood === 'string' ? (valueToMoodMapping[moodToValueMapping[mood]] || mood.charAt(0).toUpperCase() + mood.slice(1)) : "Data Mood Tidak Valid";
-                  return (
-                    <li key={mood} className="text-gray-700 dark:text-gray-300">
-                      <span className={`font-semibold ${
-                          mood === 'senang' ? 'text-green-500' :
-                          mood === 'semangat' ? 'text-pink-500' :
-                          mood === 'biasa' ? 'text-yellow-500' :
-                          mood === 'sedih' ? 'text-blue-500' :
-                          mood === 'cemas' ? 'text-orange-500' :
-                          mood === 'marah' ? 'text-red-500' : 'text-gray-500' // Fallback color
-                      }`}>
-                        {moodDisplayName}
-                      </span>
-                      : {count} kali
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 mb-6">Belum ada data ringkasan mood untuk ditampilkan.</p>
-            )}
-
-
-            <hr className="my-6 border-gray-200 dark:border-gray-700"/>
-            <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300 mb-3">Detail Entri:</h3>
-            <ul className="space-y-3">
-              {todayMoodEntries.map((entry) => {
-                const moodDisplayName = (entry && entry.mood && typeof entry.mood === 'string') ? (valueToMoodMapping[moodToValueMapping[entry.mood]] || entry.mood.charAt(0).toUpperCase() + entry.mood.slice(1)) : "N/A";
-                const entryTime = (entry && entry.timestamp && typeof entry.timestamp.toDate === 'function') ? entry.timestamp.toDate().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : 'Waktu Tidak Valid';
-                return (
-                  <li key={entry.id} className="text-gray-700 dark:text-gray-300 flex items-center">
-                    <span className={`w-3 h-3 rounded-full mr-3 ${
-                        entry.mood === 'senang' ? 'bg-green-400' :
-                        entry.mood === 'semangat' ? 'bg-pink-400' :
-                        entry.mood === 'biasa' ? 'bg-yellow-400' :
-                        entry.mood === 'sedih' ? 'bg-blue-400' :
-                        entry.mood === 'cemas' ? 'bg-orange-400' :
-                        entry.mood === 'marah' ? 'bg-red-400' : 'bg-gray-400' // Fallback color
-                    }`}></span>
-                    <span className="font-medium">{moodDisplayName}</span>
-                    <span className="ml-auto text-sm text-gray-500 dark:text-gray-400">Pukul {entryTime}</span>
-                  </li>
-                );
-              })}
-            </ul>
+      {/* Pemilih Rentang Tanggal */}
+      <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg mb-8">
+        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-4">Pilih Rentang Waktu</h2>
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div className="flex-1">
+            <label htmlFor="startDate" className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Dari Tanggal</label>
+            <input type="date" id="startDate" name="startDate" value={startDate.toISOString().split('T')[0]} onChange={handleDateChange} className="w-full p-2 border border-gray-300 dark:border-slate-600 rounded-md dark:bg-slate-700 dark:text-gray-200"/>
           </div>
-        ) : (
-          <p className="text-gray-500 dark:text-gray-400">Belum ada mood yang tercatat hari ini. Yuk, input mood-mu!</p>
+          <div className="flex-1">
+            <label htmlFor="endDate" className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Sampai Tanggal</label>
+            <input type="date" id="endDate" name="endDate" value={endDate.toISOString().split('T')[0]} onChange={handleDateChange} className="w-full p-2 border border-gray-300 dark:border-slate-600 rounded-md dark:bg-slate-700 dark:text-gray-200"/>
+          </div>
+          <div>
+            {/* <button onClick={resetDateRange} className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-slate-700 rounded-md hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors">
+              Reset (7 Hari)
+            </button> */}
+          </div>
+        </div>
+      </div>
+      
+      {/* --- BAGIAN RIWAYAT MOOD YANG DIPERBARUI --- */}
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg mb-8">
+        <button 
+          onClick={() => setShowMoodHistory(!showMoodHistory)}
+          className="w-full flex justify-between items-center text-left text-2xl font-semibold text-gray-700 dark:text-gray-200"
+        >
+          <span>Riwayat Mood Tercatat</span>
+          {showMoodHistory ? <ChevronUpIcon className="h-6 w-6"/> : <ChevronDownIcon className="h-6 w-6"/>}
+        </button>
+
+        {/* Daftar riwayat mood hanya akan ditampilkan jika showMoodHistory bernilai true */}
+        {showMoodHistory && (
+            <div className="mt-6">
+                {Object.keys(groupedMoodHistory).length > 0 ? (
+                <div className="space-y-6 max-h-[50vh] overflow-y-auto pr-2">
+                    {Object.entries(groupedMoodHistory).map(([date, entries]) => (
+                    <div key={date}>
+                        <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 pb-2 mb-3 border-b border-gray-200 dark:border-slate-700">{date}</h3>
+                        <div className="flex flex-wrap gap-2">
+                        {entries.map(entry => {
+                            if (!entry?.id || !entry?.mood) return null;
+                            const moodKey = entry.mood.toLowerCase();
+                            const moodValueFromMap = moodToValueMapping[moodKey];
+                            const moodDisplayName = valueToMoodMapping[moodValueFromMap] || entry.mood;
+                            const entryTime = entry.timestamp.toDate().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                            return (
+                            <div key={entry.id} title={`Mood ${moodDisplayName} pada pukul ${entryTime}`} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-transform transform hover:scale-105 ${
+                                moodKey === 'senang' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                moodKey === 'semangat' ? 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200' :
+                                moodKey === 'biasa' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                moodKey === 'sedih' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                moodKey === 'cemas' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                                moodKey === 'marah' || moodKey === 'stres' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                            }`}>
+                                <span>{moodDisplayName}</span>
+                                <span className="opacity-75 font-normal">{entryTime}</span>
+                            </div>
+                            );
+                        })}
+                        </div>
+                    </div>
+                    ))}
+                </div>
+                ) : (
+                <p className="mt-4 text-gray-500 dark:text-gray-400">Tidak ada mood yang tercatat pada rentang waktu ini.</p>
+                )}
+            </div>
         )}
       </div>
 
-      {/* Bagian Chart, Challenge, Badge */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Grafik Mood */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg">
-          <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">Riwayat Emosi (7 Hari Terakhir)</h2>
-          {moodChartData.labels && moodChartData.labels.length > 0 ? ( // Periksa apakah labels ada dan tidak kosong
-            <Line data={moodChartData} options={{
-              responsive: true,
-              maintainAspectRatio: true, // Sesuaikan jika perlu
-              scales: {
-                y: {
-                  ticks: {
-                    callback: function(value) { return valueToMoodMapping[value] || ''; },
-                    stepSize: 1,
-                    color: document.documentElement.classList.contains('dark') ? '#94a3b8' : '#4b5563', // Warna tick sumbu Y
-                  },
-                  grid: {
-                    color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                  },
-                  min: 1, // Sesuaikan dengan nilai mood terendah Anda
-                  max: 6  // Sesuaikan dengan nilai mood tertinggi Anda
-                },
-                x: {
-                  ticks: {
-                    color: document.documentElement.classList.contains('dark') ? '#94a3b8' : '#4b5563', // Warna tick sumbu X
-                  },
-                  grid: {
-                    display: false, // Sembunyikan grid sumbu X jika mau
-                  }
-                }
-              },
-              plugins: {
-                legend: {
-                  labels: {
-                    color: document.documentElement.classList.contains('dark') ? '#e2e8f0' : '#374151', // Warna label legend
-                  }
-                }
-              }
-            }} />
-          ) : (
-            <p className="text-gray-500 dark:text-gray-400">Data mood belum cukup untuk menampilkan grafik.</p>
-          )}
-        </div>
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Grafik sekarang menggunakan data yang sudah difilter */}
+        <MoodTrendChart moodHistory={filteredMoodHistory} />
 
-        {/* Challenge Selesai & Badge */}
         <div className="space-y-8">
           <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">Challenge Selesai</h2>
-            {completedChallenges.length > 0 ? (
-              <ul className="space-y-2">
-                {completedChallenges.map(ch => (
-                  <li key={ch.id} className="text-gray-700 dark:text-gray-300">✅ {ch.title}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400">Belum ada challenge yang selesai.</p>
-            )}
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">Badge Terkumpul</h2>
-            {badges.length > 0 ? (
-              <div className="flex flex-wrap gap-3">
-                {badges.map(b => (
-                  <span key={b.id} className="bg-yellow-400 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                    🏅 {b.name}
-                  </span>
-                ))}
+            
+            {userBadges && Object.keys(userBadges).length > 0 ? (
+              <div className="flex flex-wrap gap-4">
+                {Object.keys(userBadges).map(badgeId => {
+                  const badgeInfo = badgeList[badgeId];
+                  if (!badgeInfo) return null;
+                  return (
+                    <div key={badgeId} className="text-center group w-24 flex flex-col items-center" title={`${badgeInfo.name}: ${badgeInfo.description}`}>
+                      <img src={badgeInfo.imageUrl || 'https://via.placeholder.com/64'} alt={badgeInfo.name} className="h-16 w-16 mx-auto"/>
+                      <p className="text-xs mt-2 text-gray-600 dark:text-gray-300 font-medium text-wrap">{badgeInfo.name}</p>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-gray-500 dark:text-gray-400">Belum ada badge yang terkumpul.</p>
             )}
+            
+            {/* Bagian Panduan Badge yang Ringan */}
+            <div className="mt-8 border-t border-gray-200 dark:border-slate-700 pt-6">
+              <button 
+                onClick={() => setShowGuide(!showGuide)}
+                className="w-full flex justify-between items-center text-left text-lg font-semibold text-gray-700 dark:text-gray-300"
+              >
+                <span>Panduan Mendapatkan Badge</span>
+                {showGuide ? <ChevronUpIcon className="h-6 w-6"/> : <ChevronDownIcon className="h-6 w-6"/>}
+              </button>
+
+              {showGuide && (
+                <div className="mt-4 space-y-4 max-h-[40vh] overflow-y-auto pr-2">
+                  {Object.values(badgeList).map((badge) => (
+                    <div key={badge.name} className="flex items-start gap-4 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                      <img src={badge.imageUrl} alt={badge.name} className="h-14 w-14 flex-shrink-0"/>
+                      <div>
+                        <h3 className="font-semibold text-gray-800 dark:text-gray-100">{badge.name}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{badge.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

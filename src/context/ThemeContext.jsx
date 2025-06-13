@@ -7,14 +7,14 @@ export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Cek preferensi tema dari localStorage atau OS
+    // Cek preferensi 
     const storedTheme = localStorage.getItem('theme');
     const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     return storedTheme || (userPrefersDark ? 'dark' : 'light');
   });
 
   useEffect(() => {
-    const root = window.document.documentElement; // <html> element
+    const root = window.document.documentElement; 
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {

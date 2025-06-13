@@ -1,39 +1,44 @@
-// screens/NgobrolAiScreen.js
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { FaTheaterMasks, FaRegLaughSquint, FaGuitar, FaHeart } from 'react-icons/fa';
 
+// Definisikan mode-mode AI kita di sini agar mudah dikelola
 const aiModes = [
-  { name: "Roasting AI", slug: "roasting", emoji: "🔥", description: "Siap di-roasting sama AI?" },
   { name: "Lawak AI", slug: "lawak", emoji: "😂", description: "Dapatkan dosis tawa harianmu." },
-  { name: "Skena AI", slug: "skena", emoji: "🎶", description: "Obrolan anak skena indie." },
-  { name: "Gombalan AI", slug: "gombalan", emoji: "💖", description: "Bikin hatimu meleleh." },
+  { name: "Roasting AI", slug: "roasting", emoji: "🔥", description: "Siap mental di-roasting sama AI? Cuma buat yang kuat mental!" },
+  { name: "Gombalan AI", slug: "gombal", emoji: "💖", description: "Bikin hatimu meleleh dengan rayuan maut dari AI." },
+  { name: "Asisten Cerdas", slug: "default", emoji: "💡", description: "Ngobrol santai dengan asisten AI yang membantu." },
 ];
 
 function NgobrolAiScreen() {
   const navigate = useNavigate();
 
+  // Fungsi ini akan dipanggil saat sebuah mode dipilih
   const handleModeSelect = (slug) => {
-    navigate(`/chat?ai_mode=${slug}`); // Atau rute khusus /chat-ai/:mode
+  
+    navigate(`/chat?mode=${slug}`);
   };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 dark:text-gray-300">Ngobrol AI Seru</h1>
+      <h1 className="text-3xl font-bold mb-2 dark:text-gray-200">Ngobrol Seru dengan AI</h1>
+      <p className="text-md text-gray-500 mb-6">Pilih kepribadian AI yang kamu mau ajak ngobrol hari ini.</p>
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
         {aiModes.map((mode) => (
           <button
             key={mode.slug}
             onClick={() => handleModeSelect(mode.slug)}
-            className="bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 hover:shadow-xl p-4 rounded"
+            className="bg-gray-800 bg-slate-50 dark:bg-slate-800 hover:bg-gray-100 hover:shadow-xl text-left p-6 rounded-lg transition-transform transform hover:-translate-y-1"
           >
-            <span className="text-4xl block mb-2">{mode.emoji}</span>
-            <h2 className="text-xl font-semibold text-teal-600 mb-1">{mode.name}</h2>
-            <p className="text-gray-600 text-sm">{mode.description}</p>
+            <span className="text-4xl block mb-3">{mode.emoji}</span>
+            <h2 className="text-xl font-semibold text-teal-400 mb-1">{mode.name}</h2>
+            <p className="text-gray-400 text-sm">{mode.description}</p>
           </button>
         ))}
       </div>
     </div>
   );
 }
+
 export default NgobrolAiScreen;

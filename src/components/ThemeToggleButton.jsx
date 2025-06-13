@@ -1,9 +1,9 @@
-// src/components/ThemeToggleButton.jsx
+
 import React from 'react';
-import { useTheme } from '../context/ThemeContext'; // Assuming you have a ThemeContext
+import { useTheme } from '../context/ThemeContext'; 
 import { SunIcon, MoonIcon } from '@heroicons/react/24/solid';
 
-function ThemeToggleButton({ collapsed }) { // Accept collapsed prop
+function ThemeToggleButton({ collapsed }) { 
   const { theme, toggleTheme } = useTheme();
   const isDarkMode = theme === 'dark';
 

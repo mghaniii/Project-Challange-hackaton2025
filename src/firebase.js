@@ -3,6 +3,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getFunctions } from "firebase/functions";
 
 // TODO: Ganti dengan konfigurasi proyek Firebase Anda
 const firebaseConfig = {
@@ -16,9 +17,12 @@ const firebaseConfig = {
 
 // Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const functions = getFunctions(app, 'asia-southeast2');
 
-// Inisialisasi layanan yang akan digunakan
-const db = getFirestore(app); // Firestore Database
-const auth = getAuth(app);   // Firebase Authentication
 
-export { db, auth };
+export { db, auth, functions };
+
+
+

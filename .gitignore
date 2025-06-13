@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.vercel
+
+# Abaikan folder node_modules
+node_modules
+
+# Abaikan file .env yang berisi kunci rahasia
+.env
