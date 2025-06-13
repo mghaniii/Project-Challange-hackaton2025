@@ -9,7 +9,7 @@ const textAnalytics_pkg = require("@azure/ai-text-analytics");
 
 const app = express();
 app.use(cors({
-  origin: 'https://dainty-stroopwafel-236718.netlify.app/' 
+  origin: 'https://dainty-stroopwafel-236718.netlify.app' 
 }));
 app.use(express.json());
 
