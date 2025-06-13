@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const API_URL = 'kuat-diri-api-2025-ccf6d5b4gehfe6bc.southeastasia-01.azurewebsites.net/api/chat-cerdas';
+const API_URL = 'https://project-challange-hackaton2025.onrender.com/api/chat-cerdas';
 
 /**
  * Mengirim pesan dan mode ke backend AI.

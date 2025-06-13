@@ -8,9 +8,7 @@ require('dotenv').config();
 const textAnalytics_pkg = require("@azure/ai-text-analytics");
 
 const app = express();
-app.use(cors({
-  origin: 'https://dainty-stroopwafel-236718.netlify.app' 
-}));
+app.use(cors({ origin: 'https://euphonious-granita-571447.netlify.app/' }));
 app.use(express.json());
 
 const TextAnalyticsClient = textAnalytics_pkg.TextAnalyticsClient;
