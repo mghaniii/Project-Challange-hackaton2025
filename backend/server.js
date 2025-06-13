@@ -8,7 +8,10 @@ require('dotenv').config();
 const textAnalytics_pkg = require("@azure/ai-text-analytics");
 
 const app = express();
-app.use(cors({ origin: 'https://euphonious-granita-571447.netlify.app/' }));
+// BENAR
+app.use(cors({
+  origin: 'https://euphonious-granita-571447.netlify.app'
+}));
 app.use(express.json());
 
 const TextAnalyticsClient = textAnalytics_pkg.TextAnalyticsClient;
