@@ -10,7 +10,7 @@ const textAnalytics_pkg = require("@azure/ai-text-analytics");
 const app = express();
 // BENAR
 app.use(cors({
-  origin: 'https://euphonious-granita-571447.netlify.app'
+  origin: 'https://kuat-diri-app.netlify.app'
 }));
 app.use(express.json());
 
