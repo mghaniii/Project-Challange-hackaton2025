@@ -1,4 +1,4 @@
-// screens/SadariDiriPathScreen.jsx
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircleIcon, ChevronRightIcon } from '@heroicons/react/24/solid'; 
@@ -6,7 +6,7 @@ import { useUser } from '../context/UserContext';
 import { edukasiLevels } from '../config/sadariDiriLevels';
 
 function SadariDiriPathScreen() {
-  // Kita tetap menggunakan sadariDiriProgress untuk melacak level yang sudah selesai
+  
   const { sadariDiriProgress } = useUser();
 
   return (
